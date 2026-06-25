@@ -3146,8 +3146,8 @@ function renderSnapshotCatalog() {
     }
 
     table {
-      width: 1170px;
-      min-width: 900px;
+      width: 100%;
+      min-width: 820px;
       border-collapse: collapse;
       font-size: 12px;
       table-layout: fixed;
@@ -3380,7 +3380,7 @@ function renderSnapshotCatalog() {
           <section class="help-section">
             <h3>이 화면이 하는 일</h3>
             <p>매일 오전 10시 KST에 봇이 T world Shop PC/MO 메인페이지에 접속해서 콘텐츠 HTML을 저장합니다. 팝업은 닫고, GNB와 푸터를 제외한 콘텐츠 영역에서 <strong>ga_action</strong>, <strong>ga_label</strong> 어트리뷰트를 가진 클릭 요소를 수집합니다.</p>
-            <p>왼쪽 화면은 그날 저장한 HTML이고, 오른쪽 표는 선택한 기간 동안 발견된 GA 요소와 GA4 클릭 데이터를 함께 보여줍니다.</p>
+            <p>왼쪽 화면은 매일 오전 10시에 봇이 사이트에 직접 들어가 캡처한 HTML 화면이고, 오른쪽 표는 선택한 기간 동안 발견된 GA 요소와 GA4 클릭 데이터를 함께 보여줍니다.</p>
           </section>
           <section class="help-section">
             <h3>페이지와 기간 선택</h3>
@@ -3455,12 +3455,12 @@ function renderSnapshotCatalog() {
         <div class="table-wrap" id="tableWrap">
           <table id="gaTable">
             <colgroup id="tableColGroup">
-              <col style="width: 220px">
-              <col style="width: 340px">
-              <col style="width: 190px">
-              <col style="width: 140px">
-              <col style="width: 140px">
-              <col style="width: 140px">
+              <col style="width: 145px">
+              <col style="width: 225px">
+              <col style="width: 135px">
+              <col style="width: 105px">
+              <col style="width: 105px">
+              <col style="width: 105px">
             </colgroup>
             <thead>
               <tr>
@@ -3521,6 +3521,7 @@ function renderSnapshotCatalog() {
     let revealedElements = new Set();
     let sourceViewportWidth = 1440;
     let isMobilePreview = false;
+    let lastPreviewMode = null;
     let dragging = false;
     let layoutSyncFrame = 0;
     let periodViewRequestId = 0;
@@ -3649,7 +3650,7 @@ function renderSnapshotCatalog() {
 
     function installColumnResizers() {
       const cols = Array.from(tableColGroup.children);
-      const minWidths = [140, 180, 140, 110, 110, 110];
+      const minWidths = [120, 160, 120, 90, 90, 90];
 
       for (const handle of document.querySelectorAll('.col-resizer')) {
         handle.addEventListener('pointerdown', (event) => {
@@ -3698,7 +3699,7 @@ function renderSnapshotCatalog() {
         return sum + (Number.parseFloat(col.style.width) || col.getBoundingClientRect().width || 0);
       }, 0);
       const visibleWidth = Math.max(0, tableWrap.clientWidth - 1);
-      const nextWidth = Math.max(900, Math.ceil(totalWidth), visibleWidth);
+      const nextWidth = Math.max(820, Math.ceil(totalWidth), visibleWidth);
       gaTable.style.width = nextWidth + 'px';
       gaTable.style.minWidth = nextWidth + 'px';
     }
@@ -4253,7 +4254,13 @@ function renderSnapshotCatalog() {
     function loadContent(run, target) {
       currentRun = run;
       currentTarget = target;
-      isMobilePreview = target.id.includes('mobile');
+      const nextMobilePreview = target.id.includes('mobile');
+      const nextPreviewMode = nextMobilePreview ? 'mobile' : 'pc';
+      if (lastPreviewMode !== nextPreviewMode) {
+        workspace.style.gridTemplateColumns = '';
+        lastPreviewMode = nextPreviewMode;
+      }
+      isMobilePreview = nextMobilePreview;
       sourceViewportWidth = target.page?.viewportWidth || (isMobilePreview ? 390 : 1440);
       workspace.classList.toggle('mobile', isMobilePreview);
       workspace.classList.toggle('pc', !isMobilePreview);
