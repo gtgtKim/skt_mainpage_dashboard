@@ -2816,7 +2816,7 @@ function renderSnapshotCatalog() {
 
     .bar {
       display: grid;
-      grid-template-columns: auto minmax(170px, 260px) minmax(150px, 190px) minmax(150px, 190px) minmax(0, 1fr) auto;
+      grid-template-columns: auto minmax(170px, 260px) minmax(150px, 190px) minmax(150px, 190px) minmax(0, 1fr);
       gap: 10px;
       align-items: center;
       padding: 12px 14px;
@@ -2865,31 +2865,6 @@ function renderSnapshotCatalog() {
 
     .stats strong {
       color: #1d2430;
-    }
-
-    .links {
-      display: flex;
-      gap: 8px;
-      justify-content: end;
-      white-space: nowrap;
-    }
-
-    .links a {
-      display: inline-grid;
-      place-items: center;
-      height: 34px;
-      padding: 0 10px;
-      border: 1px solid #cfd7e5;
-      border-radius: 6px;
-      color: #0b6bcb;
-      background: #fbfcff;
-      font-size: 12px;
-      font-weight: 700;
-      text-decoration: none;
-    }
-
-    .links a:hover {
-      border-color: #0b6bcb;
     }
 
     .workspace {
@@ -3179,8 +3154,7 @@ function renderSnapshotCatalog() {
         align-items: stretch;
       }
 
-      .stats,
-      .links {
+      .stats {
         justify-content: start;
         flex-wrap: wrap;
         white-space: normal;
@@ -3225,10 +3199,6 @@ function renderSnapshotCatalog() {
         <input id="endDate" type="date">
       </label>
       <div class="stats" id="stats"></div>
-      <div class="links">
-        <a id="jsonLink" href="#">JSON</a>
-        <a id="csvLink" href="#">CSV</a>
-      </div>
     </section>
     <section class="workspace" id="workspace">
       <section class="preview" id="preview" aria-label="Snapshot preview">
@@ -3290,8 +3260,6 @@ function renderSnapshotCatalog() {
     const gaTable = document.getElementById('gaTable');
     const tableColGroup = document.getElementById('tableColGroup');
     const periodRows = document.getElementById('periodRows');
-    const jsonLink = document.getElementById('jsonLink');
-    const csvLink = document.getElementById('csvLink');
     const collapsedGroups = new Set();
     const elementsCache = new Map();
     let catalog = { runs: [] };
@@ -3983,8 +3951,6 @@ function renderSnapshotCatalog() {
       workspace.classList.toggle('pc', !isMobilePreview);
       contentFrame.removeAttribute('srcdoc');
       contentFrame.src = target.contentPath;
-      jsonLink.href = target.domJsonPath;
-      csvLink.href = target.domCsvPath;
       panelMeta.textContent = run.date + ' · ' + target.label;
       scheduleLayoutSync();
     }
@@ -4399,8 +4365,6 @@ function renderSnapshotCatalog() {
       if (!runs.length || !latestRun || !latestTarget) {
         stats.textContent = '선택 기간에 저장된 데이터가 없습니다.';
         panelMeta.textContent = '';
-        jsonLink.removeAttribute('href');
-        csvLink.removeAttribute('href');
         return;
       }
 
