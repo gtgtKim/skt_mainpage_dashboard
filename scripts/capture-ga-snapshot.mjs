@@ -2812,13 +2812,15 @@ function renderSnapshotCatalog() {
       grid-template-rows: auto 1fr;
       height: 100vh;
       min-width: 0;
+      min-height: 0;
     }
 
     .bar {
       display: grid;
-      grid-template-columns: auto minmax(170px, 260px) minmax(150px, 190px) minmax(150px, 190px) minmax(0, 1fr);
+      grid-template-columns: auto minmax(170px, 260px) minmax(150px, 190px) minmax(150px, 190px) minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
+      min-width: 0;
       padding: 12px 14px;
       border-bottom: 1px solid #d7deea;
       background: #fff;
@@ -2867,11 +2869,158 @@ function renderSnapshotCatalog() {
       color: #1d2430;
     }
 
+    .help-button {
+      white-space: nowrap;
+    }
+
+    .help-popover {
+      position: fixed;
+      top: 58px;
+      right: 14px;
+      z-index: 30;
+      width: min(360px, calc(100vw - 28px));
+      padding: 16px;
+      border: 1px solid #bed3ef;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 16px 44px rgba(20, 31, 48, 0.18);
+      color: #263244;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .help-popover[hidden],
+    .help-modal[hidden] {
+      display: none;
+    }
+
+    .help-popover::before {
+      content: "";
+      position: absolute;
+      top: -8px;
+      right: 24px;
+      width: 14px;
+      height: 14px;
+      border-top: 1px solid #bed3ef;
+      border-left: 1px solid #bed3ef;
+      background: #fff;
+      transform: rotate(45deg);
+    }
+
+    .help-popover strong,
+    .help-modal strong {
+      color: #172033;
+    }
+
+    .help-popover p {
+      margin: 0 0 10px;
+    }
+
+    .help-popover ul,
+    .help-modal ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .help-popover li,
+    .help-modal li {
+      margin: 4px 0;
+    }
+
+    .help-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .help-actions button {
+      height: 32px;
+    }
+
+    .help-primary {
+      border-color: #0b6bcb;
+      background: #0b6bcb;
+      color: #fff;
+    }
+
+    .help-primary:hover {
+      color: #fff;
+    }
+
+    .help-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(23, 32, 51, 0.48);
+    }
+
+    .help-dialog {
+      width: min(760px, 100%);
+      max-height: min(760px, calc(100vh - 48px));
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 24px 70px rgba(16, 24, 40, 0.34);
+    }
+
+    .help-dialog-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid #e3e8f0;
+    }
+
+    .help-dialog-head h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .help-dialog-body {
+      overflow: auto;
+      padding: 18px 20px 20px;
+      color: #39465a;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .help-section + .help-section {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid #edf0f5;
+    }
+
+    .help-section h3 {
+      margin: 0 0 8px;
+      color: #172033;
+      font-size: 15px;
+    }
+
+    .help-section p {
+      margin: 0 0 8px;
+    }
+
+    .help-dialog-foot {
+      display: flex;
+      justify-content: flex-end;
+      padding: 14px 20px;
+      border-top: 1px solid #e3e8f0;
+      background: #fbfcfe;
+    }
+
     .workspace {
       display: grid;
       grid-template-columns: minmax(320px, 1fr) 10px minmax(380px, 560px);
       gap: 0;
       min-width: 0;
+      min-height: 0;
       height: 100%;
       padding: 12px;
       overflow: hidden;
@@ -2933,6 +3082,7 @@ function renderSnapshotCatalog() {
 
     .panel {
       min-width: 0;
+      min-height: 0;
       height: 100%;
       display: grid;
       grid-template-rows: auto auto 1fr;
@@ -2987,9 +3137,12 @@ function renderSnapshotCatalog() {
 
     .table-wrap {
       min-width: 0;
-      width: calc(100% - 4px);
-      max-width: calc(100% - 4px);
+      min-height: 0;
+      width: 100%;
+      max-width: 100%;
+      height: 100%;
       overflow: auto;
+      scrollbar-gutter: stable both-edges;
     }
 
     table {
@@ -3160,6 +3313,10 @@ function renderSnapshotCatalog() {
         white-space: normal;
       }
 
+      .help-popover {
+        top: 66px;
+      }
+
       .workspace,
       .workspace.mobile {
         grid-template-columns: 1fr;
@@ -3199,6 +3356,84 @@ function renderSnapshotCatalog() {
         <input id="endDate" type="date">
       </label>
       <div class="stats" id="stats"></div>
+      <button class="help-button" id="helpButton" type="button">도움말</button>
+    </section>
+    <section class="help-popover" id="introTip" hidden aria-label="Quick help">
+      <p><strong>처음 사용하시나요?</strong></p>
+      <ul>
+        <li>페이지 선택으로 PC/MO 메인페이지를 전환할 수 있습니다.</li>
+        <li>기간을 선택하면 해당 기간의 요소 유지기간과 GA4 데이터를 봅니다.</li>
+        <li>왼쪽 요소를 클릭하면 표로, 표 행을 클릭하면 왼쪽 요소로 이동합니다.</li>
+      </ul>
+      <div class="help-actions">
+        <button id="introClose" type="button">닫기</button>
+        <button class="help-primary" id="introOpenHelp" type="button">자세히 보기</button>
+      </div>
+    </section>
+    <section class="help-modal" id="helpModal" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="help-dialog">
+        <div class="help-dialog-head">
+          <h2 id="helpTitle">대시보드 도움말</h2>
+          <button id="helpClose" type="button">닫기</button>
+        </div>
+        <div class="help-dialog-body">
+          <section class="help-section">
+            <h3>이 화면이 하는 일</h3>
+            <p>매일 오전 10시 KST에 봇이 T world Shop PC/MO 메인페이지에 접속해서 콘텐츠 HTML을 저장합니다. 팝업은 닫고, GNB와 푸터를 제외한 콘텐츠 영역에서 <strong>ga_action</strong>, <strong>ga_label</strong> 어트리뷰트를 가진 클릭 요소를 수집합니다.</p>
+            <p>왼쪽 화면은 그날 저장한 HTML이고, 오른쪽 표는 선택한 기간 동안 발견된 GA 요소와 GA4 클릭 데이터를 함께 보여줍니다.</p>
+          </section>
+          <section class="help-section">
+            <h3>페이지와 기간 선택</h3>
+            <ul>
+              <li><strong>페이지</strong>: T world Shop Mobile Main과 PC Main을 선택합니다.</li>
+              <li><strong>시작일/종료일</strong>: 선택한 기간에 존재했던 요소를 한눈에 봅니다.</li>
+              <li>기본 왼쪽 화면은 선택 기간 안에서 가장 최신 캡처본입니다.</li>
+              <li>표에서 최신 캡처본에 없는 과거 요소를 클릭하면, 그 요소가 존재하던 기간 안의 가장 최신 캡처본으로 왼쪽 화면이 바뀝니다.</li>
+            </ul>
+          </section>
+          <section class="help-section">
+            <h3>GA4 데이터 기준</h3>
+            <ul>
+              <li>이벤트명은 <strong>click</strong>입니다.</li>
+              <li>PC는 <strong>event_category = TWD_main</strong> 기준입니다.</li>
+              <li>MO는 <strong>event_category = MTWD_main</strong>과 <strong>hostName = m.shop.tworld.co.kr</strong> 기준입니다.</li>
+              <li>표의 수치는 <strong>값 (전체 대비 비율)</strong> 형식입니다.</li>
+              <li>오늘 날짜를 포함하면 GA4 특성상 일반적으로 현재 시점 기준 약 4시간 전 데이터까지만 조회될 수 있습니다. 확정 데이터는 보통 다음 날 이후가 더 안정적입니다.</li>
+            </ul>
+          </section>
+          <section class="help-section">
+            <h3>좌우 클릭 연동</h3>
+            <ul>
+              <li>왼쪽 캡처 화면의 요소를 클릭하면 오른쪽 표에서 해당 행으로 이동합니다.</li>
+              <li>오른쪽 표의 행을 클릭하면 왼쪽 화면이 해당 요소 위치로 이동하고 빨간 박스를 표시합니다.</li>
+              <li>같은 ga_action/ga_label/유지기간을 가진 요소가 여러 개면 표에서는 하나로 합쳐지고, 반복 클릭하면 해당 요소들을 차례로 포커스합니다.</li>
+              <li>왼쪽 캡처 화면의 원래 링크 이동 기능은 막혀 있습니다.</li>
+            </ul>
+          </section>
+          <section class="help-section">
+            <h3>표 사용법</h3>
+            <ul>
+              <li><strong>전체 펼치기/전체 접기</strong>로 ga_action 그룹을 한 번에 열고 닫을 수 있습니다.</li>
+              <li>각 ga_action 그룹 행을 클릭하면 해당 그룹만 접거나 펼칩니다.</li>
+              <li>검색창에서 ga_action, ga_label, 유지기간을 검색할 수 있습니다.</li>
+              <li>열 경계선을 드래그해서 표 열 너비를 조정할 수 있습니다.</li>
+              <li>왼쪽 화면과 표 사이 경계선을 드래그해서 화면 비율을 조정할 수 있습니다.</li>
+            </ul>
+          </section>
+          <section class="help-section">
+            <h3>유지기간</h3>
+            <p>유지기간은 선택한 기간 안에서 같은 요소가 계속 발견된 날짜 구간입니다. 형식은 <strong>YYYY-MM-DD ~ YYYY-MM-DD</strong>입니다.</p>
+            <p>중간에 요소가 사라졌다가 다시 생기거나, ga_action/ga_label 조합이 바뀌면 유지기간이 나뉠 수 있습니다.</p>
+          </section>
+          <section class="help-section">
+            <h3>자동 수집</h3>
+            <p>수집 봇은 매일 오전 10시에 사이트에 접속해 HTML과 GA 어트리뷰트 목록을 저장합니다. 수집이 실패하면 10분 간격으로 최대 6번 재시도하고, 성공한 날짜별 데이터는 PC/MO 각각 하나의 캡처본만 유지합니다.</p>
+          </section>
+        </div>
+        <div class="help-dialog-foot">
+          <button class="help-primary" id="helpCloseBottom" type="button">확인</button>
+        </div>
+      </div>
     </section>
     <section class="workspace" id="workspace">
       <section class="preview" id="preview" aria-label="Snapshot preview">
@@ -3256,10 +3491,18 @@ function renderSnapshotCatalog() {
     const filterInput = document.getElementById('filterInput');
     const expandAllButton = document.getElementById('expandAll');
     const collapseAllButton = document.getElementById('collapseAll');
+    const helpButton = document.getElementById('helpButton');
+    const introTip = document.getElementById('introTip');
+    const introClose = document.getElementById('introClose');
+    const introOpenHelp = document.getElementById('introOpenHelp');
+    const helpModal = document.getElementById('helpModal');
+    const helpClose = document.getElementById('helpClose');
+    const helpCloseBottom = document.getElementById('helpCloseBottom');
     const tableWrap = document.getElementById('tableWrap');
     const gaTable = document.getElementById('gaTable');
     const tableColGroup = document.getElementById('tableColGroup');
     const periodRows = document.getElementById('periodRows');
+    const HELP_SEEN_KEY = 'ga-snapshot-help-seen-v2';
     const collapsedGroups = new Set();
     const elementsCache = new Map();
     let catalog = { runs: [] };
@@ -3300,6 +3543,8 @@ function renderSnapshotCatalog() {
         await loadCatalog();
         renderTargetOptions();
         updatePeriodView();
+        scheduleStartupLayoutSync();
+        window.setTimeout(showIntroTip, 700);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         stats.textContent = 'catalog.json을 불러오지 못했습니다. npm run serve로 연 뒤 다시 확인하세요.';
@@ -3362,7 +3607,26 @@ function renderSnapshotCatalog() {
         for (const record of periodRecords) collapsedGroups.add(groupIdForAction(record.ga_action));
         renderPeriodRows();
       });
+      helpButton.addEventListener('click', openHelp);
+      introClose.addEventListener('click', hideIntroTip);
+      introOpenHelp.addEventListener('click', () => {
+        hideIntroTip();
+        openHelp();
+      });
+      helpClose.addEventListener('click', closeHelp);
+      helpCloseBottom.addEventListener('click', closeHelp);
+      helpModal.addEventListener('click', (event) => {
+        if (event.target === helpModal) closeHelp();
+      });
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          closeHelp();
+          hideIntroTip();
+        }
+      });
       window.addEventListener('resize', scheduleLayoutSync);
+      window.addEventListener('load', scheduleStartupLayoutSync);
+      window.addEventListener('pageshow', scheduleStartupLayoutSync);
       contentFrame.addEventListener('load', () => {
         scheduleLayoutSync();
         installContentClickBridge();
@@ -3453,6 +3717,12 @@ function renderSnapshotCatalog() {
       });
     }
 
+    function scheduleStartupLayoutSync() {
+      for (const delay of [0, 40, 120, 260, 520, 900]) {
+        window.setTimeout(scheduleLayoutSync, delay);
+      }
+    }
+
     function normalizeWorkspaceColumns() {
       if (window.matchMedia('(max-width: 900px)').matches) {
         workspace.style.gridTemplateColumns = '';
@@ -3525,6 +3795,7 @@ function renderSnapshotCatalog() {
       periodRecords = buildPeriodRecords(runs, targetId);
       rebuildRecordIndexes();
       renderPeriodRows();
+      tableWrap.scrollLeft = 0;
       updateMeta(runs, latestRun, latestTarget);
       loadContent(latestRun, latestTarget);
       scheduleGa4MetricsRefresh({ targetId, startDate: startDateInput.value, endDate: endDateInput.value, requestId: ga4RequestId });
@@ -3830,6 +4101,8 @@ function renderSnapshotCatalog() {
           if (record) focusRecord(record, { clearFilter: false, scrollRow: false, cycle: true });
         });
       }
+
+      scheduleLayoutSync();
     }
 
     function renderStatusRow(message) {
@@ -3848,6 +4121,41 @@ function renderSnapshotCatalog() {
 
     function hasSelectedText() {
       return Boolean(window.getSelection?.().toString().trim());
+    }
+
+    function showIntroTip() {
+      if (localStorageAvailable() && window.localStorage.getItem(HELP_SEEN_KEY) === '1') return;
+      introTip.hidden = false;
+    }
+
+    function hideIntroTip() {
+      introTip.hidden = true;
+      if (localStorageAvailable()) window.localStorage.setItem(HELP_SEEN_KEY, '1');
+    }
+
+    function openHelp() {
+      introTip.hidden = true;
+      helpModal.hidden = false;
+      document.body.classList.add('is-help-open');
+      helpClose.focus();
+      if (localStorageAvailable()) window.localStorage.setItem(HELP_SEEN_KEY, '1');
+    }
+
+    function closeHelp() {
+      helpModal.hidden = true;
+      document.body.classList.remove('is-help-open');
+      helpButton.focus();
+    }
+
+    function localStorageAvailable() {
+      try {
+        const key = '__ga_snapshot_storage_test__';
+        window.localStorage.setItem(key, '1');
+        window.localStorage.removeItem(key);
+        return true;
+      } catch {
+        return false;
+      }
     }
 
     function focusOccurrence(occurrence, options = {}) {
