@@ -12,7 +12,9 @@ export const GA4_CONFIG = {
     eventCategory: process.env.GA4_DIMENSION_EVENT_CATEGORY || 'customEvent:event_category',
     eventAction: process.env.GA4_DIMENSION_EVENT_ACTION || 'customEvent:event_action',
     eventLabel: process.env.GA4_DIMENSION_EVENT_LABEL || 'customEvent:event_label',
+    hostname: process.env.GA4_DIMENSION_HOSTNAME || 'hostName',
   },
+  mobileHostname: process.env.GA4_MOBILE_HOSTNAME || 'm.shop.tworld.co.kr',
 };
 
 let cachedClient = null;
@@ -32,6 +34,7 @@ export async function queryGa4Metrics({ targetId, startDate, endDate }) {
 
   const client = getGa4Client(keyFilename);
   const eventCategory = ga4CategoryForTargetId(targetId);
+  const hostname = ga4HostnameForTargetId(targetId);
   const dimensionFilter = {
     andGroup: {
       expressions: [
@@ -50,6 +53,16 @@ export async function queryGa4Metrics({ targetId, startDate, endDate }) {
       ],
     },
   };
+
+  if (hostname) {
+    dimensionFilter.andGroup.expressions.push({
+      filter: {
+        fieldName: GA4_CONFIG.dimensions.hostname,
+        stringFilter: { matchType: 'EXACT', value: hostname },
+      },
+    });
+  }
+
   const metricsSpec = [{ name: 'eventCount' }, { name: 'sessions' }, { name: 'activeUsers' }];
   const [[response], [totalResponse]] = await Promise.all([
     client.runReport({
@@ -97,6 +110,7 @@ export async function queryGa4Metrics({ targetId, startDate, endDate }) {
     accountId: GA4_CONFIG.accountId,
     eventName: GA4_CONFIG.eventName,
     eventCategory,
+    hostname,
     startDate,
     endDate,
     targetId,
@@ -118,6 +132,10 @@ export async function findGa4CredentialFile() {
 
 export function ga4CategoryForTargetId(targetId) {
   return String(targetId).includes('mobile') ? 'MTWD_main' : 'TWD_main';
+}
+
+export function ga4HostnameForTargetId(targetId) {
+  return String(targetId).includes('mobile') ? GA4_CONFIG.mobileHostname : null;
 }
 
 export function makeGa4MetricKey(action, label) {
