@@ -1,0 +1,8 @@
+node_modules
+snapshots
+.git
+.github
+.DS_Store
+*.log
+skt-otw-ua-*.json
+*service-account*.json

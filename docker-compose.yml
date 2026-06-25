@@ -1,0 +1,48 @@
+services:
+  app:
+    build: .
+    image: skt-main-scrapping:local
+    init: true
+    shm_size: "1gb"
+    ports:
+      - "${APP_PORT:-4173}:4173"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 4173
+      TZ: Asia/Seoul
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/ga4-key.json
+    volumes:
+      - ./snapshots:/app/snapshots
+      - ./skt-otw-ua-44615111-2-34043f78264e.json:/run/secrets/ga4-key.json:ro
+    command: npm run serve
+
+  scheduler:
+    image: skt-main-scrapping:local
+    restart: unless-stopped
+    init: true
+    shm_size: "1gb"
+    environment:
+      TZ: Asia/Seoul
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/ga4-key.json
+      CAPTURE_SCHEDULE_HOUR: 10
+      CAPTURE_SCHEDULE_MINUTE: 0
+      CAPTURE_RETRY_ATTEMPTS: 6
+      CAPTURE_RETRY_DELAY_MS: 600000
+    volumes:
+      - ./snapshots:/app/snapshots
+      - ./skt-otw-ua-44615111-2-34043f78264e.json:/run/secrets/ga4-key.json:ro
+    command: npm run schedule
+
+  capture:
+    image: skt-main-scrapping:local
+    profiles:
+      - capture
+    init: true
+    shm_size: "1gb"
+    environment:
+      TZ: Asia/Seoul
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/ga4-key.json
+    volumes:
+      - ./snapshots:/app/snapshots
+      - ./skt-otw-ua-44615111-2-34043f78264e.json:/run/secrets/ga4-key.json:ro
+    command: npm run capture:retry

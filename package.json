@@ -1,0 +1,17 @@
+{
+  "name": "skt-main-scrapping",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "capture": "node scripts/capture-ga-snapshot.mjs",
+    "capture:retry": "node scripts/capture-with-retry.mjs",
+    "schedule": "node scripts/schedule-capture.mjs",
+    "serve": "node scripts/serve-snapshots.mjs"
+  },
+  "dependencies": {
+    "@google-analytics/data": "^6.1.0",
+    "playwright": "^1.55.0",
+    "sharp": "^0.34.3"
+  }
+}
