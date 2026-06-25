@@ -3416,7 +3416,8 @@ function renderSnapshotCatalog() {
         </div>
         <div class="help-dialog-body">
           <section class="help-section">
-            <h3>이 화면이 하는 일</h3>
+            <h3>이 대시보드의 목적</h3>
+            <p>T world Shop 메인페이지는 노출 요소가 자주 바뀌고, 각 클릭 영역이 어떤 <strong>ga_action</strong>, <strong>ga_label</strong> 값을 가지는지 한눈에 파악하기 어려워 분석에 시간이 걸렸습니다. 이 대시보드는 그 불편을 줄이기 위해 날짜별 메인페이지 화면과 GA 클릭 어트리뷰트를 함께 저장하고 비교할 수 있도록 만든 화면입니다.</p>
             <p>매일 오전 10시 KST에 봇이 T world Shop PC/MO 메인페이지에 접속해서 콘텐츠 HTML을 저장합니다. 팝업은 닫고, GNB와 푸터를 제외한 콘텐츠 영역에서 <strong>ga_action</strong>, <strong>ga_label</strong> 어트리뷰트를 가진 클릭 요소를 수집합니다.</p>
             <p>왼쪽 화면은 매일 오전 10시에 봇이 사이트에 직접 들어가 캡처한 HTML 화면이고, 오른쪽 표는 선택한 기간 동안 발견된 GA 요소와 GA4 클릭 데이터를 함께 보여줍니다.</p>
           </section>
