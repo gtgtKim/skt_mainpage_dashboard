@@ -2817,7 +2817,7 @@ function renderSnapshotCatalog() {
 
     .bar {
       display: grid;
-      grid-template-columns: auto minmax(170px, 260px) minmax(150px, 190px) minmax(150px, 190px) minmax(0, 1fr) auto;
+      grid-template-columns: auto minmax(170px, 260px) minmax(310px, 400px) minmax(0, 1fr) auto;
       gap: 10px;
       align-items: center;
       min-width: 0;
@@ -2838,6 +2838,13 @@ function renderSnapshotCatalog() {
       color: #596579;
       font-size: 11px;
       font-weight: 700;
+    }
+
+    .date-controls {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(140px, 1fr));
+      gap: 10px;
+      min-width: 0;
     }
 
     select,
@@ -2875,10 +2882,8 @@ function renderSnapshotCatalog() {
 
     .help-popover {
       position: fixed;
-      top: 58px;
-      right: 14px;
-      z-index: 30;
-      width: min(360px, calc(100vw - 28px));
+      z-index: 70;
+      width: min(340px, calc(100vw - 28px));
       padding: 16px;
       border: 1px solid #bed3ef;
       border-radius: 8px;
@@ -2897,14 +2902,43 @@ function renderSnapshotCatalog() {
     .help-popover::before {
       content: "";
       position: absolute;
-      top: -8px;
-      right: 24px;
+      left: var(--arrow-left, 24px);
       width: 14px;
       height: 14px;
-      border-top: 1px solid #bed3ef;
-      border-left: 1px solid #bed3ef;
       background: #fff;
       transform: rotate(45deg);
+    }
+
+    .help-popover[data-placement="bottom"]::before {
+      top: -8px;
+      border-top: 1px solid #bed3ef;
+      border-left: 1px solid #bed3ef;
+    }
+
+    .help-popover[data-placement="top"]::before {
+      bottom: -8px;
+      border-right: 1px solid #bed3ef;
+      border-bottom: 1px solid #bed3ef;
+    }
+
+    .tour-step {
+      margin: 0 0 6px;
+      color: #0b6bcb;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .tour-body {
+      margin: 0;
+    }
+
+    .tour-focus {
+      position: relative;
+      z-index: 60;
+      outline: 3px solid rgba(11, 107, 203, 0.42);
+      outline-offset: 3px;
+      border-radius: 8px;
     }
 
     .help-popover strong,
@@ -2951,7 +2985,7 @@ function renderSnapshotCatalog() {
     .help-modal {
       position: fixed;
       inset: 0;
-      z-index: 40;
+      z-index: 80;
       display: grid;
       place-items: center;
       padding: 24px;
@@ -3314,7 +3348,9 @@ function renderSnapshotCatalog() {
       }
 
       .help-popover {
-        top: 66px;
+        left: 14px !important;
+        right: 14px !important;
+        width: auto;
       }
 
       .workspace,
@@ -3333,6 +3369,10 @@ function renderSnapshotCatalog() {
         height: 82vh;
       }
 
+      .date-controls {
+        grid-template-columns: 1fr;
+      }
+
       .panel {
         margin: 12px 0 0;
       }
@@ -3343,31 +3383,29 @@ function renderSnapshotCatalog() {
   <main class="period-app">
     <section class="bar" aria-label="Snapshot controls">
       <h1>GA Snapshot</h1>
-      <label>
+      <label id="pageControl">
         페이지
         <select id="targetSelect"></select>
       </label>
-      <label>
-        시작일
-        <input id="startDate" type="date">
-      </label>
-      <label>
-        종료일
-        <input id="endDate" type="date">
-      </label>
+      <div class="date-controls" id="dateControls">
+        <label>
+          시작일
+          <input id="startDate" type="date">
+        </label>
+        <label>
+          종료일
+          <input id="endDate" type="date">
+        </label>
+      </div>
       <div class="stats" id="stats"></div>
       <button class="help-button" id="helpButton" type="button">도움말</button>
     </section>
-    <section class="help-popover" id="introTip" hidden aria-label="Quick help">
-      <p><strong>처음 사용하시나요?</strong></p>
-      <ul>
-        <li>페이지 선택으로 PC/MO 메인페이지를 전환할 수 있습니다.</li>
-        <li>기간을 선택하면 해당 기간의 요소 유지기간과 GA4 데이터를 봅니다.</li>
-        <li>왼쪽 요소를 클릭하면 표로, 표 행을 클릭하면 왼쪽 요소로 이동합니다.</li>
-      </ul>
+    <section class="help-popover" id="introTip" hidden aria-live="polite">
+      <p class="tour-step" id="tourStep"></p>
+      <p><strong id="tourTitle"></strong></p>
+      <p class="tour-body" id="tourBody"></p>
       <div class="help-actions">
-        <button id="introClose" type="button">닫기</button>
-        <button class="help-primary" id="introOpenHelp" type="button">자세히 보기</button>
+        <button class="help-primary" id="tourNext" type="button">확인</button>
       </div>
     </section>
     <section class="help-modal" id="helpModal" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
@@ -3440,7 +3478,7 @@ function renderSnapshotCatalog() {
         <iframe id="contentFrame" title="Snapshot content"></iframe>
       </section>
       <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" aria-label="Resize preview and GA Attributes"></div>
-      <aside class="panel" aria-label="GA Attributes">
+      <aside class="panel" id="attributePanel" aria-label="GA Attributes">
         <div class="panel-head">
           <h2>GA Attributes</h2>
           <div class="stats" id="panelMeta"></div>
@@ -3493,8 +3531,10 @@ function renderSnapshotCatalog() {
     const collapseAllButton = document.getElementById('collapseAll');
     const helpButton = document.getElementById('helpButton');
     const introTip = document.getElementById('introTip');
-    const introClose = document.getElementById('introClose');
-    const introOpenHelp = document.getElementById('introOpenHelp');
+    const tourStep = document.getElementById('tourStep');
+    const tourTitle = document.getElementById('tourTitle');
+    const tourBody = document.getElementById('tourBody');
+    const tourNext = document.getElementById('tourNext');
     const helpModal = document.getElementById('helpModal');
     const helpClose = document.getElementById('helpClose');
     const helpCloseBottom = document.getElementById('helpCloseBottom');
@@ -3502,7 +3542,44 @@ function renderSnapshotCatalog() {
     const gaTable = document.getElementById('gaTable');
     const tableColGroup = document.getElementById('tableColGroup');
     const periodRows = document.getElementById('periodRows');
-    const HELP_SEEN_KEY = 'ga-snapshot-help-seen-v2';
+    const HELP_SEEN_KEY = 'ga-snapshot-help-seen-v3';
+    const TOUR_STEPS = [
+      {
+        target: '#pageControl',
+        title: '페이지 선택',
+        body: '여기에서 MO 메인페이지와 PC 메인페이지를 전환합니다. 페이지를 바꾸면 왼쪽 캡처 화면과 오른쪽 GA 표가 함께 바뀝니다.',
+      },
+      {
+        target: '#dateControls',
+        title: '기간 선택',
+        body: '시작일과 종료일로 조회 기간을 정합니다. 오늘 날짜를 포함하면 GA4 특성상 일반적으로 현재 시점 기준 약 4시간 전 데이터까지만 조회될 수 있습니다.',
+      },
+      {
+        target: '#splitter',
+        title: '화면 비율 조절',
+        body: '왼쪽 화면과 오른쪽 표 사이의 경계선을 좌우로 드래그하면 두 영역의 크기를 조절할 수 있습니다.',
+      },
+      {
+        target: '#preview',
+        title: '왼쪽 캡처 화면',
+        body: '매일 오전 10시에 봇이 사이트에 접속해서 저장한 HTML 화면입니다. 화면 안 요소를 클릭하면 오른쪽 표의 해당 행으로 이동합니다.',
+      },
+      {
+        target: '#tableWrap',
+        title: 'GA Attributes 표',
+        body: '표 행을 클릭하면 왼쪽 화면에서 해당 요소 위치로 이동하고 빨간 박스를 표시합니다. 같은 GA 값이 여러 요소에 있으면 반복 클릭으로 차례대로 봅니다.',
+      },
+      {
+        target: '.toolbar-actions',
+        title: '전체 펼치기/접기',
+        body: 'ga_action 그룹을 한 번에 펼치거나 접을 수 있습니다. 그룹 행을 클릭하면 해당 그룹만 따로 열고 닫을 수 있습니다.',
+      },
+      {
+        target: '#helpButton',
+        title: '상세 도움말',
+        body: '수집 로직, GA4 조회 기준, 유지기간 의미가 궁금하면 언제든 이 버튼을 눌러 자세한 도움말을 볼 수 있습니다.',
+      },
+    ];
     const collapsedGroups = new Set();
     const elementsCache = new Map();
     let catalog = { runs: [] };
@@ -3522,6 +3599,8 @@ function renderSnapshotCatalog() {
     let sourceViewportWidth = 1440;
     let isMobilePreview = false;
     let lastPreviewMode = null;
+    let introStepIndex = 0;
+    let activeTourTarget = null;
     let dragging = false;
     let layoutSyncFrame = 0;
     let periodViewRequestId = 0;
@@ -3609,11 +3688,7 @@ function renderSnapshotCatalog() {
         renderPeriodRows();
       });
       helpButton.addEventListener('click', openHelp);
-      introClose.addEventListener('click', hideIntroTip);
-      introOpenHelp.addEventListener('click', () => {
-        hideIntroTip();
-        openHelp();
-      });
+      tourNext.addEventListener('click', advanceIntroTip);
       helpClose.addEventListener('click', closeHelp);
       helpCloseBottom.addEventListener('click', closeHelp);
       helpModal.addEventListener('click', (event) => {
@@ -3710,10 +3785,12 @@ function renderSnapshotCatalog() {
         normalizeWorkspaceColumns();
         fitContentFrame();
         syncTableWidth();
+        positionIntroTip();
         window.requestAnimationFrame(() => {
           normalizeWorkspaceColumns();
           fitContentFrame();
           syncTableWidth();
+          positionIntroTip();
         });
       });
     }
@@ -3740,6 +3817,26 @@ function renderSnapshotCatalog() {
       const computedColumns = window.getComputedStyle(workspace).gridTemplateColumns.split(' ');
       const currentPreview = Number.parseFloat(computedColumns[0]) || minPreview;
       const previewWidth = Math.max(minPreview, Math.min(currentPreview, maxPreview));
+      const panelWidth = Math.max(minPanel, available - previewWidth - splitterWidth);
+
+      workspace.style.gridTemplateColumns = previewWidth + 'px ' + splitterWidth + 'px ' + panelWidth + 'px';
+    }
+
+    function applyDefaultWorkspaceColumns(mobile) {
+      if (window.matchMedia('(max-width: 900px)').matches) {
+        workspace.style.gridTemplateColumns = '';
+        return;
+      }
+
+      const available = getWorkspaceTrackWidth();
+      if (available <= 0) return;
+
+      const splitterWidth = splitter.getBoundingClientRect().width || 10;
+      const minPreview = mobile ? 300 : 320;
+      const preferredPreview = mobile ? 392 : 420;
+      const minPanel = 360;
+      const maxPreview = Math.max(minPreview, available - splitterWidth - minPanel);
+      const previewWidth = Math.max(minPreview, Math.min(preferredPreview, maxPreview));
       const panelWidth = Math.max(minPanel, available - previewWidth - splitterWidth);
 
       workspace.style.gridTemplateColumns = previewWidth + 'px ' + splitterWidth + 'px ' + panelWidth + 'px';
@@ -4126,20 +4223,83 @@ function renderSnapshotCatalog() {
 
     function showIntroTip() {
       if (localStorageAvailable() && window.localStorage.getItem(HELP_SEEN_KEY) === '1') return;
-      introTip.hidden = false;
+      introStepIndex = 0;
+      renderIntroStep();
     }
 
     function hideIntroTip() {
+      clearTourFocus();
       introTip.hidden = true;
       if (localStorageAvailable()) window.localStorage.setItem(HELP_SEEN_KEY, '1');
     }
 
+    function advanceIntroTip() {
+      if (introStepIndex >= TOUR_STEPS.length - 1) {
+        hideIntroTip();
+        return;
+      }
+      introStepIndex += 1;
+      renderIntroStep();
+    }
+
+    function renderIntroStep() {
+      const step = TOUR_STEPS[introStepIndex];
+      if (!step) {
+        hideIntroTip();
+        return;
+      }
+
+      const target = document.querySelector(step.target);
+      if (!target) {
+        introStepIndex += 1;
+        renderIntroStep();
+        return;
+      }
+
+      clearTourFocus();
+      activeTourTarget = target;
+      activeTourTarget.classList.add('tour-focus');
+      tourStep.textContent = (introStepIndex + 1) + ' / ' + TOUR_STEPS.length;
+      tourTitle.textContent = step.title;
+      tourBody.textContent = step.body;
+      tourNext.textContent = introStepIndex === TOUR_STEPS.length - 1 ? '닫기' : '확인';
+      introTip.hidden = false;
+      window.requestAnimationFrame(positionIntroTip);
+    }
+
+    function clearTourFocus() {
+      if (activeTourTarget) activeTourTarget.classList.remove('tour-focus');
+      activeTourTarget = null;
+    }
+
+    function positionIntroTip() {
+      if (introTip.hidden || !activeTourTarget) return;
+
+      const targetRect = activeTourTarget.getBoundingClientRect();
+      const tipRect = introTip.getBoundingClientRect();
+      const margin = 12;
+      const targetCenter = targetRect.left + targetRect.width / 2;
+      const placement = targetRect.bottom + tipRect.height + margin <= window.innerHeight ? 'bottom' : 'top';
+      const maxLeft = Math.max(margin, window.innerWidth - tipRect.width - margin);
+      const left = Math.max(margin, Math.min(maxLeft, targetCenter - tipRect.width / 2));
+      const rawTop = placement === 'bottom'
+        ? targetRect.bottom + margin
+        : targetRect.top - tipRect.height - margin;
+      const maxTop = Math.max(margin, window.innerHeight - tipRect.height - margin);
+      const top = Math.max(margin, Math.min(maxTop, rawTop));
+      const arrowLeft = Math.max(18, Math.min(tipRect.width - 22, targetCenter - left - 7));
+
+      introTip.dataset.placement = placement;
+      introTip.style.left = left + 'px';
+      introTip.style.top = top + 'px';
+      introTip.style.setProperty('--arrow-left', arrowLeft + 'px');
+    }
+
     function openHelp() {
-      introTip.hidden = true;
+      hideIntroTip();
       helpModal.hidden = false;
       document.body.classList.add('is-help-open');
       helpClose.focus();
-      if (localStorageAvailable()) window.localStorage.setItem(HELP_SEEN_KEY, '1');
     }
 
     function closeHelp() {
@@ -4256,14 +4416,14 @@ function renderSnapshotCatalog() {
       currentTarget = target;
       const nextMobilePreview = target.id.includes('mobile');
       const nextPreviewMode = nextMobilePreview ? 'mobile' : 'pc';
-      if (lastPreviewMode !== nextPreviewMode) {
-        workspace.style.gridTemplateColumns = '';
-        lastPreviewMode = nextPreviewMode;
-      }
       isMobilePreview = nextMobilePreview;
       sourceViewportWidth = target.page?.viewportWidth || (isMobilePreview ? 390 : 1440);
       workspace.classList.toggle('mobile', isMobilePreview);
       workspace.classList.toggle('pc', !isMobilePreview);
+      if (lastPreviewMode !== nextPreviewMode) {
+        applyDefaultWorkspaceColumns(isMobilePreview);
+        lastPreviewMode = nextPreviewMode;
+      }
       contentFrame.removeAttribute('srcdoc');
       contentFrame.src = target.contentPath;
       panelMeta.textContent = run.date + ' · ' + target.label;
