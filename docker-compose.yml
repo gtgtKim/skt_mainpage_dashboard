@@ -5,12 +5,16 @@ services:
     init: true
     shm_size: "1gb"
     ports:
-      - "${APP_PORT:-4173}:4173"
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-4173}:4173"
     environment:
       HOST: 0.0.0.0
       PORT: 4173
       TZ: Asia/Seoul
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/ga4-key.json
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:-jellyfish}
+      DASHBOARD_AUTH_SECRET: ${DASHBOARD_AUTH_SECRET:-change-this-dashboard-secret}
+      DASHBOARD_REQUIRE_HTTPS: ${DASHBOARD_REQUIRE_HTTPS:-false}
+      DASHBOARD_COOKIE_DAYS: ${DASHBOARD_COOKIE_DAYS:-7}
     volumes:
       - ./snapshots:/app/snapshots
       - ./skt-otw-ua-44615111-2-34043f78264e.json:/run/secrets/ga4-key.json:ro

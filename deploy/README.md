@@ -46,13 +46,22 @@ skt-otw-ua-44615111-2-34043f78264e.json
 
 This file is ignored by git and mounted read-only into the container.
 
-## 4. Start Services
+## 4. Start Services Behind HTTPS
 
 ```bash
 cd skt_mainpage_dashboard
 docker compose build
-APP_PORT=80 docker compose up -d app scheduler
+APP_BIND=127.0.0.1 APP_PORT=4173 DASHBOARD_REQUIRE_HTTPS=true docker compose up -d app scheduler
 ```
+
+Install Nginx and obtain a Let's Encrypt IP certificate, then install `deploy/nginx-dashboard.conf`.
+The public endpoint should be:
+
+```text
+https://<STATIC_EXTERNAL_IP>/snapshots/index.html
+```
+
+The dashboard password is configured with `DASHBOARD_PASSWORD`; the current default is `jellyfish`.
 
 Check:
 
@@ -64,7 +73,7 @@ docker compose logs --tail=50 scheduler
 Open:
 
 ```text
-http://<STATIC_EXTERNAL_IP>/snapshots/index.html
+https://<STATIC_EXTERNAL_IP>/snapshots/index.html
 ```
 
 ## 5. Deploy Updates
@@ -73,7 +82,7 @@ http://<STATIC_EXTERNAL_IP>/snapshots/index.html
 cd skt_mainpage_dashboard
 git pull --ff-only
 docker compose build
-APP_PORT=80 docker compose up -d app scheduler
+APP_BIND=127.0.0.1 APP_PORT=4173 DASHBOARD_REQUIRE_HTTPS=true docker compose up -d app scheduler
 ```
 
 ## 6. Manual Capture

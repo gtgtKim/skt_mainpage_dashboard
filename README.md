@@ -15,6 +15,12 @@ Open:
 http://127.0.0.1:4176/snapshots/index.html
 ```
 
+Default dashboard password:
+
+```text
+jellyfish
+```
+
 Run a manual capture with retry:
 
 ```bash
@@ -50,10 +56,10 @@ GitHub private repository
 
 Use a GitHub read-only deploy key on the VM for private repository access.
 
-For a public HTTP endpoint without a domain, set `APP_PORT=80` before starting Compose:
+For production without a domain, keep the app bound to localhost and put Nginx HTTPS in front:
 
 ```bash
-APP_PORT=80 docker compose up -d app scheduler
+APP_BIND=127.0.0.1 APP_PORT=4173 DASHBOARD_REQUIRE_HTTPS=true docker compose up -d app scheduler
 ```
 
 The scheduler runs capture every day at `10:00 Asia/Seoul` and retries failures.
