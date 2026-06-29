@@ -3953,7 +3953,7 @@ function renderSnapshotCatalog() {
 
       try {
         const params = new URLSearchParams({ targetId, startDate, endDate });
-        const response = await fetch('/api/ga4-metrics?' + params.toString(), {
+        const response = await fetch('../api/ga4-metrics?' + params.toString(), {
           method: 'GET',
           cache: 'no-store',
           headers: { Accept: 'application/json' },

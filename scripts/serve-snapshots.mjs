@@ -13,23 +13,30 @@ const DASHBOARD_AUTH_SECRET = process.env.DASHBOARD_AUTH_SECRET || 'change-this-
 const DASHBOARD_COOKIE_NAME = process.env.DASHBOARD_COOKIE_NAME || 'skt_dashboard_auth';
 const DASHBOARD_COOKIE_DAYS = Number(process.env.DASHBOARD_COOKIE_DAYS || 7);
 const REQUIRE_HTTPS = process.env.DASHBOARD_REQUIRE_HTTPS === 'true';
+const BASE_PATH = normalizeBasePath(process.env.BASE_PATH || '');
 
 const server = http.createServer(async (request, response) => {
   try {
     const url = new URL(request.url || '/', `http://${request.headers.host || `${HOST}:${PORT}`}`);
+    const appPath = stripBasePath(url.pathname);
+
+    if (appPath === null) {
+      sendText(response, 404, 'Not Found');
+      return;
+    }
 
     if (REQUIRE_HTTPS && !isSecureRequest(request)) {
       redirect(response, `https://${request.headers.host || '34.47.71.229'}${url.pathname}${url.search}`);
       return;
     }
 
-    if (request.method === 'POST' && url.pathname === '/login') {
+    if (request.method === 'POST' && appPath === '/login') {
       await handleLogin(request, response, url);
       return;
     }
 
     if (!isAuthenticated(request)) {
-      if (url.pathname.startsWith('/api/')) {
+      if (appPath.startsWith('/api/')) {
         sendJson(response, 401, { status: 'error', error: 'Authentication required.' });
         return;
       }
@@ -43,7 +50,7 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
-    if (request.method === 'GET' && url.pathname === '/api/ga4-metrics') {
+    if (request.method === 'GET' && appPath === '/api/ga4-metrics') {
       await handleGa4Metrics(url, response);
       return;
     }
@@ -53,13 +60,13 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
-    if (url.pathname === '/' || url.pathname === '/index.html') {
-      redirect(response, '/snapshots/index.html');
+    if (appPath === '/' || appPath === '/index.html') {
+      redirect(response, withBasePath('/snapshots/index.html'));
       return;
     }
 
-    if (url.pathname.startsWith('/snapshots/')) {
-      await serveSnapshotFile(url.pathname, request, response);
+    if (appPath.startsWith('/snapshots/')) {
+      await serveSnapshotFile(appPath, request, response);
       return;
     }
 
@@ -73,14 +80,14 @@ const server = http.createServer(async (request, response) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`GA Snapshot server: http://${HOST}:${PORT}/snapshots/index.html`);
+  console.log(`GA Snapshot server: http://${HOST}:${PORT}${withBasePath('/snapshots/index.html')}`);
 });
 
 async function handleLogin(request, response, url) {
   const body = await readRequestBody(request);
   const params = new URLSearchParams(body);
   const password = params.get('password') || '';
-  const returnTo = safeReturnTo(params.get('returnTo') || url.searchParams.get('returnTo') || '/snapshots/index.html');
+  const returnTo = safeReturnTo(params.get('returnTo') || url.searchParams.get('returnTo') || withBasePath('/snapshots/index.html'));
 
   if (!constantTimeEqual(password, DASHBOARD_PASSWORD)) {
     sendLoginPage(response, { returnTo, error: '비밀번호가 올바르지 않습니다.' });
@@ -166,7 +173,7 @@ function redirect(response, location) {
   response.end();
 }
 
-function sendLoginPage(response, { returnTo = '/snapshots/index.html', error = '' } = {}) {
+function sendLoginPage(response, { returnTo = withBasePath('/snapshots/index.html'), error = '' } = {}) {
   response.writeHead(200, {
     'Content-Type': 'text/html; charset=utf-8',
     'Cache-Control': 'no-store',
@@ -244,7 +251,7 @@ function sendLoginPage(response, { returnTo = '/snapshots/index.html', error = '
   <main>
     <h1>GA Snapshot</h1>
     ${error ? `<p class="error">${escapeHtml(error)}</p>` : ''}
-    <form method="post" action="/login">
+    <form method="post" action="${escapeHtml(withBasePath('/login'))}">
       <input type="hidden" name="returnTo" value="${escapeHtml(safeReturnTo(returnTo))}">
       <label>
         비밀번호
@@ -301,7 +308,7 @@ function authCookie(request) {
   const expires = String(Date.now() + maxAge * 1000);
   const token = `v1.${expires}.${signAuthCookie(expires)}`;
   const secure = isSecureRequest(request) || REQUIRE_HTTPS ? '; Secure' : '';
-  return `${DASHBOARD_COOKIE_NAME}=${token}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${secure}`;
+  return `${DASHBOARD_COOKIE_NAME}=${token}; Path=${BASE_PATH || '/'}; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${secure}`;
 }
 
 function signAuthCookie(value) {
@@ -343,11 +350,33 @@ async function readRequestBody(request) {
 }
 
 function safeReturnTo(value) {
-  const fallback = '/snapshots/index.html';
+  const fallback = withBasePath('/snapshots/index.html');
   const text = String(value || fallback);
   if (!text.startsWith('/') || text.startsWith('//')) return fallback;
-  if (text === '/login') return fallback;
+  if (BASE_PATH && text !== BASE_PATH && !text.startsWith(`${BASE_PATH}/`)) return fallback;
+  if (text === '/login' || text === withBasePath('/login')) return fallback;
   return text;
+}
+
+function normalizeBasePath(value) {
+  const text = String(value || '').trim();
+  if (!text || text === '/') return '';
+  return `/${text.replace(/^\/+|\/+$/g, '')}`;
+}
+
+function stripBasePath(pathname) {
+  if (!BASE_PATH) return pathname;
+  if (pathname === BASE_PATH) return '/';
+  if (pathname.startsWith(`${BASE_PATH}/`)) return pathname.slice(BASE_PATH.length) || '/';
+  return null;
+}
+
+function withBasePath(pathname) {
+  const pathText = String(pathname || '/');
+  const normalizedPath = pathText.startsWith('/') ? pathText : `/${pathText}`;
+  if (!BASE_PATH) return normalizedPath;
+  if (normalizedPath === '/') return BASE_PATH;
+  return `${BASE_PATH}${normalizedPath}`;
 }
 
 function escapeHtml(value) {

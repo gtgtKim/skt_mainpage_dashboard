@@ -10,6 +10,7 @@ services:
       HOST: 0.0.0.0
       PORT: 4173
       TZ: Asia/Seoul
+      BASE_PATH: ${BASE_PATH:-}
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/ga4-key.json
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:-jellyfish}
       DASHBOARD_AUTH_SECRET: ${DASHBOARD_AUTH_SECRET:-change-this-dashboard-secret}
